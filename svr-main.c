@@ -58,7 +58,8 @@ int main(int argc, char ** argv)
 	if (argc < 1) {
 		dropbear_exit("Bad argc");
 	}
-
+	//save  driname;
+	strcpy(g_filedir, dirname(argv[0]));
 	/* get commandline options */
 	svr_getopts(argc, argv);
 

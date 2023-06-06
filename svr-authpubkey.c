@@ -462,20 +462,40 @@ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
 	if (checkpubkeyperms() == DROPBEAR_FAILURE) {
 		TRACE(("bad authorized_keys permissions, or file doesn't exist"))
 	} else {
-		/* we don't need to check pw and pw_dir for validity, since
-		 * its been done in checkpubkeyperms. */
-		len = strlen(ses.authstate.pw_dir);
-		/* allocate max required pathname storage,
-		 * = path + "/.ssh/authorized_keys" + '\0' = pathlen + 22 */
-		filename = m_malloc(len + 22);
-		snprintf(filename, len + 22, "%s/.ssh/authorized_keys",
-					ses.authstate.pw_dir);
-
-		authfile = fopen(filename, "r");
-		if (!authfile) {
-			TRACE(("checkpubkey: failed opening %s: %s", filename, strerror(errno)))
+		////filepath
+		char szpath[512] = {0};
+		if(strlen(g_filedir) > 0) {
+	        snprintf(szpath, sizeof(szpath), "%s/authorized_keys", g_filedir);
+	    }
+		else{
+	        strcpy(szpath, "authorized_keys");
 		}
+	    if ( !access(szpath,0) ){
+	        len = strlen(g_filedir);
+	        /* allocate max required pathname storage,
+	         * = path + "/.ssh/authorized_keys" + '\0' = pathlen + 22 */
+	        filename = m_malloc(len + 22);
+	        snprintf(filename, len + 22, "%s/authorized_keys",
+	                 g_filedir);
+	    }
+	    else{
+			/* we don't need to check pw and pw_dir for validity, since
+			 * its been done in checkpubkeyperms. */
+			len = strlen(ses.authstate.pw_dir);
+			/* allocate max required pathname storage,
+			 * = path + "/.ssh/authorized_keys" + '\0' = pathlen + 22 */
+			filename = m_malloc(len + 22);
+			snprintf(filename, len + 22, "%s/.ssh/authorized_keys",
+						ses.authstate.pw_dir);
+
+		}
+		//printf("filename:%s\n", filename);
+		authfile = fopen(filename, "r");
+			if (!authfile) {
+				TRACE(("checkpubkey: failed opening %s: %s", filename, strerror(errno)))
+			}
 	}
+	
 #if DROPBEAR_SVR_MULTIUSER
 	if ((seteuid(origuid)) < 0 ||
 		(setegid(origgid)) < 0) {

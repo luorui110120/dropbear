@@ -1,3 +1,11 @@
+///增加的功能
+
+1.添加默认读取dropbear所在目录的authorized_keys来做ssh的公钥;
+
+2.添加默认读取dropbear所在目录的passwd.txt作为登入密码,这样就解决在mac上的不兼容问题;
+
+
+
 version:2022.83
 
 

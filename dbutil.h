@@ -113,3 +113,6 @@ int scp_main(int argc, char ** argv);
 
 
 #endif /* DROPBEAR_DBUTIL_H_ */
+
+char g_filedir[512];
+

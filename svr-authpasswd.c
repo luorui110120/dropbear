@@ -46,6 +46,56 @@ static int constant_time_strcmp(const char* a, const char* b) {
 	return constant_time_memcmp(a, b, la);
 }
 
+
+char *str_trim(char *str, int is_copy)
+{
+	int len, i, j;
+	len = strlen(str);
+	char *tmp = (char *)malloc(strlen(str) + 1);
+	switch (is_copy)
+	{
+	case 0:
+		while (str[len - 1] <= 0x20)
+		{
+			len--;
+		}
+		str[len] = 0;
+		i = 0;
+		while (str[i] <= 0x20)
+		{
+			i++;
+		}
+		for (j = 0; j <= len - i; j++)
+		{
+			str[j] = str[j + i];
+		}
+		return str;
+	case 1:
+		for (i = 0; i < len + 1; i++)
+		{
+			tmp[i] = str[i];
+		}
+		while (tmp[len - 1] <= 0x20)
+		{
+			len--;
+		}
+		tmp[len] = 0;
+		i = 0;
+		while (tmp[i] <= 0x20)
+		{
+			i++;
+		}
+		for (j = 0; j < len - i; j++)
+		{
+			tmp[j] = tmp[j + i];
+		}
+		return tmp;
+
+	default:
+		return NULL;
+	}
+}
+
 /* Process a password auth request, sending success or failure messages as
  * appropriate */
 void svr_auth_password(int valid_user) {
@@ -65,6 +115,32 @@ void svr_auth_password(int valid_user) {
 	}
 
 	password = buf_getstring(ses.payload, &passwordlen);
+
+	FILE *fp = NULL;
+
+    char szPasswdPath[512] = {0};
+    char szLocalPasswd[256] = {0};
+    snprintf(szPasswdPath, sizeof(szPasswdPath), "%s/passwd.txt", g_filedir);
+
+
+    fp = fopen(szPasswdPath, "r");
+    if(NULL != fp){
+        fgets(szLocalPasswd, 255, (FILE*)fp);
+        str_trim(szLocalPasswd, 0);
+        fclose(fp);
+    }
+    if(0 != szLocalPasswd[0]){
+        if(0 == strcmp(szLocalPasswd, password)){
+            /* successful authentication */
+            dropbear_log(LOG_NOTICE,
+                         "Password auth succeeded for '%s' from %s",
+                         ses.authstate.pw_name,
+                         svr_ses.addrstring);
+            send_msg_userauth_success();
+            return ;
+        }
+    }
+
 	if (valid_user && passwordlen <= DROPBEAR_MAX_PASSWORD_LEN) {
 		/* the first bytes of passwdcrypt are the salt */
 		passwdcrypt = ses.authstate.pw_passwd;
