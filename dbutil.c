@@ -69,6 +69,8 @@
 
 #define MAX_FMT 100
 
+char g_filedir[512]={0};
+
 static void generic_dropbear_exit(int exitcode, const char* format, 
 		va_list param) ATTRIB_NORETURN;
 static void generic_dropbear_log(int priority, const char* format, 
