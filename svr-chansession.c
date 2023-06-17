@@ -686,6 +686,19 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 #if DROPBEAR_SFTPSERVER
 			if ((cmdlen == 4) && strncmp(chansess->cmd, "sftp", 4) == 0) {
 				char *expand_path = expand_homedir_path(SFTPSERVER_PATH);
+				///添加两个默认目录,当前目录
+				if(0 != access(expand_path, F_OK)){
+				    m_free(expand_path);
+					//printf("mlog:%s\n", "access(expand_path, F_OK)");
+                    expand_path = m_malloc(512);
+			        sprintf(expand_path, "%s/sftp-server", g_filedir);
+				}
+				/// ubuntu 默认目录
+				if(0 != access(expand_path, F_OK)){
+					m_free(expand_path);
+                    expand_path = m_malloc(512);
+			        sprintf(expand_path, "/usr/lib/openssh/sftp-server");
+				}
 				m_free(chansess->cmd);
 				chansess->cmd = m_strdup(expand_path);
 				m_free(expand_path);
